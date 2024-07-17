@@ -1,0 +1,61 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "wi_dje21";
+const char* password = "Djedsmhspw2015!";  
+
+const char* serverName = "http://hackerthon.pnxelec.com/put_data";
+void setup() {
+  pinMode(34, INPUT);
+  pinMode(32, INPUT);
+  pinMode(33, INPUT);
+  pinMode(39, INPUT);
+  pinMode(36, INPUT);
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.println("Connected to WiFi");
+}
+int pin[5]= { 36,39,34, 32, 33};
+String posistion[5]={"on","left","behind","right","forward"};
+double r[5] = {};
+void loop() {
+  double average = 0;
+  int max = 0;
+  if (WiFi.status() == WL_CONNECTED) {
+    for (int i = 0; i < 5; i++) {
+      r[i]=(abs(analogRead(pin[i])-2200)/double(17));
+      average += r[i];
+      if (r[i] > r[max]) max = i;
+    }
+    average /= 5;
+    HTTPClient http;
+    String serverPath = String(serverName) + "?hosu=101&direction=" + posistion[max] + "&avg=" + String(average);
+    Serial.println(r[max]);
+
+    if (r[max] >= 40) {
+      Serial.println(posistion[max]);
+      http.begin(serverPath.c_str());
+
+      int httpResponseCode = http.GET();
+
+      if (httpResponseCode > 0) {
+        String response = http.getString();
+        Serial.println(httpResponseCode);
+        Serial.println(response);
+      } else {
+        Serial.print("Error on sending GET Request: ");
+        Serial.println(httpResponseCode);
+      }
+      http.end();
+    }
+
+  } else {
+    Serial.println("WiFi Disconnected");
+  }
+  delay(300);
+}
