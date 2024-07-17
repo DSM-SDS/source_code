@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "wi_dje21";
-const char* password = "Djedsmhspw2015!";  
+const char* ssid = "kim";
+const char* password = "000000sh";  
 
 const char* serverName = "http://hackerthon.pnxelec.com/put_data";
 void setup() {
